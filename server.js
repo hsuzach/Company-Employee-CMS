@@ -45,23 +45,19 @@ function start(){
       name: 'action',
       type: 'list',
       message: 'What action would you like to do?',
-      choices: [
-        {
-          name: "View All Employee Data",
-          value: "VIEW_EMPLOYEES"
-        },
-        {
-          name: "Quit",
-          value: "QUIT"
-        }
+      choices: ['View All Employees', 'View All Employees By Department', new inquirer.Separator(), 'Quit'
+        
       ]
     }
   ]).then(answer => {
     let action = answer.action;
 
     switch (action) {
-      case "VIEW_EMPLOYEES":
+      case "View All Employees":
         viewEmployees();
+        break;
+      case "View All Employees By Department":
+        chooseDepartment()
         break;
       default:
         quit();
@@ -79,15 +75,80 @@ function viewEmployees(){
     if (err) { console.log(err) }
 
     console.table(rows)
-    start();
   })
 }
+
+function chooseDepartment(){
+  const sql = "SELECT department.id, department.name FROM department;"
+
+  db.query(sql, (err, rows) => {
+    if (err) { console.log(err) }
+
+    const departmentOptions = rows.map(({ id, name }) => ({
+      name: name,
+      value: id
+    }))
+
+    inquirer.prompt([{
+      name: 'departmentID',
+      type: 'list',
+      message: "Which department's employees would you like to view",
+      choices: departmentOptions
+    }])
+    .then(departmentID => viewEmployeesByDepartment(departmentID))
+    
+  })
+}
+
+function viewEmployeesByDepartment (x) {
+  const sql = "SELECT employees.id, employees.first_name, employees.last_name, roles.title FROM employees LEFT JOIN roles on employees.role_id = roles.id LEFT JOIN department department on roles.department_id = department.id WHERE department.id = ?;"
+  
+  const departmentID = x.departmentID;
+  
+  db.query(sql, departmentID, (err, rows) => {
+    if (err) { console.log(err) }
+    
+    console.table(rows)
+    return start();
+  })
+
+  
+  
+}
+
+
+// inquirer.prompt([
+//     {
+//       name: 'department',
+//       type: 'list',
+//       message: "Which department's employees would you like to view",
+//       choices: ['Marketing', 'Game Art', 'Game Dev', 'Esports', new inquirer.Separator(), 'Go Back']
+//     }
+//   ]).then(answer => {
+//     let department = answer.department;
+
+//     switch (department) {
+//       case "Marketing":
+//         viewMarketing();
+//         break;
+//       case "Game Art":
+//         viewGameArt();
+//         break;
+//       case "Game Dev":
+//         viewGameDev();
+//         break;
+//       case "Esports":
+//         viewEsports();
+//         break;
+//       default:
+//         start();
+//     }
+//   })
+
 
 function quit(){
   console.log('Finished')
   process.exit();
 }
 
-app.listen(PORT , () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT);
