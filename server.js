@@ -45,7 +45,7 @@ function start(){
       name: 'action',
       type: 'list',
       message: 'What action would you like to do?',
-      choices: ['View All Employees', 'View All Employees By Department', new inquirer.Separator(), 'Quit'
+      choices: ['View All Employees', 'View All Employees By Department', 'View All Departments', 'Add A Department','View All Roles', new inquirer.Separator(), 'Quit'
         
       ]
     }
@@ -59,6 +59,18 @@ function start(){
       case "View All Employees By Department":
         chooseDepartment()
         break;
+      case "Add An Employee":
+        addEmployee()
+        break;
+      case "View All Departments":
+        viewDepartments()
+        break;
+      case "Add A Department":
+        addDepartment()
+        break;
+      case "View All Roles":
+        viewRoles()
+        break;
       default:
         quit();
     }
@@ -67,7 +79,6 @@ function start(){
 start();
 
 function viewEmployees(){
-  console.log('Viewing All Employees')
 
   const sql = "SELECT employees.id, employees.first_name, employees.last_name, roles.title, department.name AS department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees LEFT JOIN roles on employees.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employees manager on manager.id = employees.manager_id;"
 
@@ -75,6 +86,30 @@ function viewEmployees(){
     if (err) { console.log(err) }
 
     console.table(rows)
+    return start();
+  })
+}
+
+function viewDepartments(){
+  const sql = "SELECT * FROM department"
+
+  db.query(sql, (err, rows) => {
+    if (err) { console.log(err) }
+
+    console.table(rows)
+    return start();
+  })
+}
+
+function viewRoles(){
+  const sql = "SELECT roles.id, roles.title, department.name AS department, roles.salary FROM roles JOIN department on roles.department_id = department.id;"
+  // "SELECT roles.id, roles.title, roles.salary FROM roles JOIN department ON roles.department_id = department.name"
+
+  db.query(sql, (err, rows) => {
+    if (err) { console.log(err) }
+
+    console.table(rows)
+    return start();
   })
 }
 
@@ -101,49 +136,42 @@ function chooseDepartment(){
 }
 
 function viewEmployeesByDepartment (x) {
-  const sql = "SELECT employees.id, employees.first_name, employees.last_name, roles.title FROM employees LEFT JOIN roles on employees.role_id = roles.id LEFT JOIN department department on roles.department_id = department.id WHERE department.id = ?;"
+  const sql = "SELECT employees.id, employees.first_name, employees.last_name, roles.title FROM employees JOIN roles on employees.role_id = roles.id JOIN department on roles.department_id = department.id WHERE department.id = ?;"
   
   const departmentID = x.departmentID;
   
   db.query(sql, departmentID, (err, rows) => {
     if (err) { console.log(err) }
-    
+
     console.table(rows)
     return start();
   })
-
-  
   
 }
 
+function addEmployee(){
 
-// inquirer.prompt([
-//     {
-//       name: 'department',
-//       type: 'list',
-//       message: "Which department's employees would you like to view",
-//       choices: ['Marketing', 'Game Art', 'Game Dev', 'Esports', new inquirer.Separator(), 'Go Back']
-//     }
-//   ]).then(answer => {
-//     let department = answer.department;
+}
 
-//     switch (department) {
-//       case "Marketing":
-//         viewMarketing();
-//         break;
-//       case "Game Art":
-//         viewGameArt();
-//         break;
-//       case "Game Dev":
-//         viewGameDev();
-//         break;
-//       case "Esports":
-//         viewEsports();
-//         break;
-//       default:
-//         start();
-//     }
-//   })
+function addDepartment(){
+  inquirer.prompt([
+    {
+      name: 'name',
+      type: 'input',
+      message: 'What is the name of the department you would like to add?',
+    }
+
+  ]).then(name => {
+    const sql = "INSERT INTO department SET ?"
+
+    db.query(sql, name, (err, res) =>{
+      if (err) { console.log(err) }
+      console.log('New Department Added')
+      return start();
+    })
+
+  })
+}
 
 
 function quit(){
