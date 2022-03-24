@@ -16,19 +16,15 @@ const db = mysql.createConnection(
   {
     host: 'localhost',
     user: 'root',
+    // add mysql password here
     password: 'hsuza123!',
     database: 'company_db'
   },
   console.log(`Connected to the company database.`)
 );
 
-// The command-line application should allow users to:
-  // Add departments, roles, employees
 
-  // View departments, roles, employees
-
-  // Update employee roles
-
+// main menu
 function start(){
   inquirer.prompt([
     {
@@ -72,20 +68,24 @@ function start(){
     }
   })
 }
+// initialize main menu
 start();
 
+//view all employees
 function viewEmployees(){
 
   const sql = "SELECT employees.id, employees.first_name, employees.last_name, roles.title, department.name AS department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees LEFT JOIN roles on employees.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employees manager on manager.id = employees.manager_id;"
 
   db.query(sql, (err, rows) => {
     if (err) { console.log(err) }
+    
 
     console.table(rows)
     return start();
   })
 }
 
+// view all departments
 function viewDepartments(){
   const sql = "SELECT * FROM department"
 
@@ -97,6 +97,7 @@ function viewDepartments(){
   })
 }
 
+//view all roles
 function viewRoles(){
   const sql = "SELECT roles.id, roles.title, department.name AS department, roles.salary FROM roles JOIN department on roles.department_id = department.id;"
   // "SELECT roles.id, roles.title, roles.salary FROM roles JOIN department ON roles.department_id = department.name"
@@ -109,6 +110,7 @@ function viewRoles(){
   })
 }
 
+// choose which department to view
 function chooseDepartment(){
   const sql = "SELECT department.id, department.name FROM department;"
 
@@ -131,6 +133,7 @@ function chooseDepartment(){
   })
 }
 
+// after selecting which department, return all employees from department
 function viewEmployeesByDepartment (x) {
   const sql = "SELECT employees.id, employees.first_name, employees.last_name, roles.title FROM employees JOIN roles on employees.role_id = roles.id JOIN department on roles.department_id = department.id WHERE department.id = ?;"
   
@@ -138,13 +141,14 @@ function viewEmployeesByDepartment (x) {
   
   db.query(sql, departmentID, (err, rows) => {
     if (err) { console.log(err) }
-
+    
     console.table(rows)
     return start();
   })
   
 }
 
+// add a new department
 function addDepartment(){
   inquirer.prompt([
     {
@@ -165,6 +169,7 @@ function addDepartment(){
   })
 }
 
+//add a new role
 function addRole(){
   const sql = "SELECT department.id, department.name FROM department;"
 
@@ -208,6 +213,7 @@ function addRole(){
   
 }
 
+// add a new employee
 function addEmployee(){
   const sql = "SELECT roles.id, roles.title, roles.salary, department.name FROM roles LEFT JOIN department ON department.id= roles.department_id;"
 
@@ -284,6 +290,7 @@ function addEmployee(){
   })
 }
 
+// change an employees role
 function updateEmployeeRole(){
   const sql = "SELECT employees.id, CONCAT(employees.first_name, ' ', employees.last_name) AS name FROM employees"
 
@@ -347,6 +354,7 @@ function updateEmployeeRole(){
   })
 }
 
+// end process
 function quit(){
   console.log('Finished')
   process.exit();
