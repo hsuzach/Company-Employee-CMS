@@ -313,7 +313,6 @@ function updateEmployeeRole(){
     .then(res => {
 
       const chosenEmployeeID = res.employeeID;
-      console.log(chosenEmployeeID)
 
       const sql2 = "SELECT roles.id, roles.title FROM roles"
 
@@ -335,7 +334,6 @@ function updateEmployeeRole(){
         ])
         .then(res => {
           const updatedRoleID = res.updatedRoleID;
-          console.log(updatedRoleID)
           
           const sql3 = "UPDATE employees SET role_id = ? WHERE id = ?"
 
