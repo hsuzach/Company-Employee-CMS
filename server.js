@@ -337,7 +337,7 @@ function updateEmployeeRole(){
           const updatedRoleID = res.updatedRoleID;
           console.log(updatedRoleID)
           
-          const sql3 = "UPDATE employee SET role_id = ? WHERE id = ?"
+          const sql3 = "UPDATE employees SET role_id = ? WHERE id = ?"
 
           db.query(sql3, [updatedRoleID, chosenEmployeeID], (err, res) =>{
             if (err) { console.log(err) }
